@@ -9,13 +9,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_svg: ^2.0.9  
+  flutter_svg: ^2.0.9
   font_awesome_flutter: ^10.7.0
-  http: ^1.2.0   # 👈 added for weather API requests
+  http: ^1.2.0   # for weather API requests
   image_picker: ^1.1.2
   shared_preferences: ^2.5.3
-  
-
 
 dev_dependencies:
   flutter_test:
