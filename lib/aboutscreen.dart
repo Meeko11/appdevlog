@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'login_screen.dart.dart'; // fixed import
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -17,10 +17,25 @@ class _AboutScreenState extends State<AboutScreen> {
   File? _imageFile;
   Uint8List? _webImageBytes;
 
+  String _username = 'Not set';
+  String _email = 'Not set';
+
   @override
   void initState() {
     super.initState();
     _loadSavedPhoto();
+    _loadUserInfo();
+  }
+
+  Future<void> _loadUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    final u = prefs.getString('username');
+    final e = prefs.getString('email');
+    if (!mounted) return;
+    setState(() {
+      _username = u == null || u.isEmpty ? 'Not set' : u;
+      _email = e == null || e.isEmpty ? 'Not set' : e;
+    });
   }
 
   Future<void> _loadSavedPhoto() async {
@@ -71,20 +86,20 @@ class _AboutScreenState extends State<AboutScreen> {
               ),
               const SizedBox(height: 20),
 
-              // User name label
-              const Text(
-                'User name :',
-                style: TextStyle(
+              // User name label (shows saved value)
+              Text(
+                'User name : $_username',
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
                 ),
               ),
               const SizedBox(height: 20),
 
-              // User email label
-              const Text(
-                'User email :',
-                style: TextStyle(
+              // User email label (shows saved value)
+              Text(
+                'User email : $_email',
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
                 ),
@@ -113,8 +128,19 @@ class _AboutScreenState extends State<AboutScreen> {
 
               // Log out button (centered)
               ElevatedButton(
-                onPressed: () {
-                  // TODO: Add logout logic here
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.remove('user_photo');
+                  await prefs.remove('user_photo_base64');
+                  // remove stored user info if you want:
+                  // await prefs.remove('username');
+                  // await prefs.remove('email');
+
+                  if (!mounted) return;
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.lightBlueAccent,
