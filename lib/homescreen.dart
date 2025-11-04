@@ -14,7 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isExpanded = false;
   bool _isWeatherExpanded = false;
 
-  List<Map<String, dynamic>> _entries = [];
+  final List<Map<String, dynamic>> _entries = [];
 
   // Weather variables
   String _temperature = "--";

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/aboutscreen.dart';
 import 'package:flutter_application_1/homescreen.dart';
 import 'package:flutter_application_1/time_capsule.dart'; // 👈 Import your capsule screen
+import 'package:flutter_svg/flutter_svg.dart'; // add flutter_svg import
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -39,48 +40,47 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               ),
             ],
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              // Capsule button
-              IconButton(
-                tooltip: "Capsule",
-                icon: Icon(
-                  Icons.medication, // capsule-like icon
-                  color: _currentIndex == 0
-                      ? const Color(0xFF063851)
-                      : Colors.grey[500],
-                  size: 28,
+          child: IconTheme(
+            data: const IconThemeData(size: 30),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                // Capsule button
+                IconButton(
+                  tooltip: "Capsule",
+                  icon: SizedBox(
+                    width: 30,
+                    height: 30,
+                    child: SvgPicture.asset(
+                      'assets/time_capsule.svg',
+                      color: _currentIndex == 0 ? const Color(0xFF063851) : Colors.grey[500],
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  onPressed: () => setState(() => _currentIndex = 0),
                 ),
-                onPressed: () => setState(() => _currentIndex = 0),
-              ),
 
-              // Home button in middle
-              IconButton(
-                tooltip: "Home",
-                icon: Icon(
-                  Icons.home,
-                  color: _currentIndex == 1
-                      ? const Color(0xFF063851)
-                      : Colors.grey[500],
-                  size: 30,
+                // Home button in middle
+                IconButton(
+                  tooltip: "Home",
+                  icon: Icon(
+                    Icons.home,
+                    color: _currentIndex == 1 ? const Color(0xFF063851) : Colors.grey[500],
+                  ),
+                  onPressed: () => setState(() => _currentIndex = 1),
                 ),
-                onPressed: () => setState(() => _currentIndex = 1),
-              ),
 
-              // About button
-              IconButton(
-                tooltip: "About",
-                icon: Icon(
-                  Icons.info,
-                  color: _currentIndex == 2
-                      ? const Color(0xFF063851)
-                      : Colors.grey[500],
-                  size: 28,
+                // About button
+                IconButton(
+                  tooltip: "About",
+                  icon: Icon(
+                    Icons.info,
+                    color: _currentIndex == 2 ? const Color(0xFF063851) : Colors.grey[500],
+                  ),
+                  onPressed: () => setState(() => _currentIndex = 2),
                 ),
-                onPressed: () => setState(() => _currentIndex = 2),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

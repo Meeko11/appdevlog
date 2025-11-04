@@ -1,7 +1,11 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_application_1/main_navigation_screen.dart';
+import 'package:flutter_application_1/main_navigation_screen.dart'; // ✅ use the navigation screen
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,27 +15,47 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  File? _userImage;
+  File? _imageFile;
+  Uint8List? _webImageBytes;
 
   @override
   void initState() {
     super.initState();
-    _loadUserImage();
+    _loadSavedPhoto();
   }
 
-  Future<void> _loadUserImage() async {
+  Future<void> _loadSavedPhoto() async {
     final prefs = await SharedPreferences.getInstance();
-    final imagePath = prefs.getString('userImage');
+    if (kIsWeb) {
+      final b64 = prefs.getString('user_photo_base64');
+      if (b64 != null) {
+        try {
+          final bytes = base64Decode(b64);
+          if (mounted) setState(() => _webImageBytes = bytes);
+        } catch (_) {
+          await prefs.remove('user_photo_base64');
+        }
+      }
+      return;
+    }
 
-    if (imagePath != null && File(imagePath).existsSync()) {
-      setState(() {
-        _userImage = File(imagePath);
-      });
+    final path = prefs.getString('user_photo');
+    if (path != null && mounted) {
+      final f = File(path);
+      if (await f.exists()) {
+        setState(() => _imageFile = f);
+      } else {
+        await prefs.remove('user_photo');
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final ImageProvider? avatarImage = kIsWeb
+        ? (_webImageBytes != null ? MemoryImage(_webImageBytes!) : null)
+        : (_imageFile != null ? FileImage(_imageFile!) : null);
+
     return Scaffold(
       backgroundColor: const Color(0xFF063851),
       body: Center(
@@ -41,17 +65,13 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Profile Image at the top
                 CircleAvatar(
                   radius: 60,
                   backgroundColor: Colors.grey[700],
-                  backgroundImage: _userImage != null ? FileImage(_userImage!) : null,
-                  child: _userImage == null
-                      ? const Icon(Icons.person, size: 60, color: Colors.white)
-                      : null,
+                  backgroundImage: avatarImage,
+                  child: avatarImage == null ? const Icon(Icons.person, size: 50, color: Colors.white) : null,
                 ),
-                const SizedBox(height: 20),
-
+                const SizedBox(height: 16),
                 Text(
                   "Let's get started",
                   style: TextStyle(
@@ -75,8 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
-                      borderSide:
-                          const BorderSide(color: Colors.lightBlueAccent),
+                      borderSide: const BorderSide(color: Colors.lightBlueAccent),
                     ),
                   ),
                   style: const TextStyle(color: Colors.white),
@@ -97,15 +116,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
-                      borderSide:
-                          const BorderSide(color: Colors.lightBlueAccent),
+                      borderSide: const BorderSide(color: Colors.lightBlueAccent),
                     ),
                   ),
                   style: const TextStyle(color: Colors.white),
                 ),
                 const SizedBox(height: 30),
 
-                // Login Button
+                // Login button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -113,8 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              const MainNavigationScreen(), // Go to nav bar
+                          builder: (context) => const MainNavigationScreen(), // ✅ nav bar
                         ),
                       );
                     },
@@ -131,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 15),
 
-                // Register Button
+                // Register button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -151,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 15),
 
-                // Forgot Password Button
+                // Forgot password button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
